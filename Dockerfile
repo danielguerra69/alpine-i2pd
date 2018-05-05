@@ -1,7 +1,23 @@
+FROM danielguerra/alpine-sdk:edge as builder
+MAINTAINER Daniel Guerra
+
+RUN echo "sdk" | sudo  -S adduser -s /bin/false -D i2pd
+WORKDIR /tmp/aports/testing/i2pd
+RUN abuild-keygen -a -n
+RUN abuild fetch
+RUN abuild unpack
+RUN abuild deps
+RUN abuild prepare
+RUN abuild build
+RUN abuild rootpkg
+
 FROM alpine:edge
 MAINTAINER Daniel Guerra
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
-RUN apk add --update --no-cache i2pd sudo
+COPY --from=builder /home/sdk/.abuild /tmp/.abuild
+RUN find /tmp/.abuild -name "*.pub" -exec cp {} /etc/apk/keys \;
+COPY --from=builder /home/sdk/packages/testing/x86_64/i2pd-2.18.0-r3.apk /tmp/i2pd-2.18.0-r3.apk
+RUN apk --no-cache add /tmp/i2pd-2.18.0-r3.apk
+RUN apk add --update --no-cache sudo
 RUN mkdir -p /var/lib/i2pd/.i2pd
 RUN ln -s /var/lib/i2pd/certificates /var/lib/i2pd/.i2pd/certificates
 RUN chown  i2pd:i2pd /var/lib/i2pd/.i2pd /var/lib/i2pd/.i2pd/certificates
