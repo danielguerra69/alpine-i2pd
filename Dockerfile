@@ -22,4 +22,5 @@ RUN mkdir -p /var/lib/i2pd/.i2pd
 RUN ln -s /var/lib/i2pd/certificates /var/lib/i2pd/.i2pd/certificates
 RUN chown  i2pd:i2pd /var/lib/i2pd/.i2pd /var/lib/i2pd/.i2pd/certificates
 ADD bin /bin
+USER i2pd
 CMD ["cmd.sh"]
